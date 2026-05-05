@@ -15,7 +15,7 @@ gcc ./exercicios/impressao.c -o ./execR/imp
 
 ### Cálculo de Fatorial
 ```bash
-./exercicios/fatorial.c -o ./execR/fat
+gcc ./exercicios/fatorial.c -o ./execR/fat
 ./execR/fat 5
 ```
 
