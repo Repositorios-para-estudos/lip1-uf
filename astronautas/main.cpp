@@ -51,15 +51,16 @@ public:
         }
     };
 
-    static Astronautas recuperar_astronauta_cpf(string c){
-        for (Astronautas ast: V_ASTRONAUTAS)
+    static Astronautas* recuperar_astronauta_cpf(string c){
+        for (Astronautas &ast: V_ASTRONAUTAS)
         {
             if (ast.cpf.compare(c) == 0)
             {
-                return ast;
+                return &ast;
             }
         }
-        cout << "Não foi encontrado nehum voo com esse código." << endl;
+        cout << "Não foi encontrado nenhum astronauta com esse código." << endl;
+        return nullptr;
     }
 
 };
@@ -91,15 +92,17 @@ public:
         return false;
     }
 
-    static Voo& recuperar_voo_cod(int cod){
+    static Voo* recuperar_voo_cod(int cod){
         for (Voo &v: V_VOOS)
         {
             if (v.codigo_voo == cod)
             {
-                return v;
+                return &v;
             }
         }
         cout << "Não foi encontrado nenhum voo com esse código." << endl;
+
+        return nullptr;
     }
 
     static void cadastrar_voo(int cod){
@@ -114,16 +117,16 @@ public:
     static void adicionar_astronauta_voo(string cpf, int cod_voo){
         if (tem_cpf(cpf) && tem_voo(cod_voo) == true)
         {
-            Astronautas ast = Astronautas::recuperar_astronauta_cpf(cpf);
-            Voo voo = Voo::recuperar_voo_cod(cod_voo);
+            Astronautas* ast = Astronautas::recuperar_astronauta_cpf(cpf);
+            Voo* voo = Voo::recuperar_voo_cod(cod_voo);
 
-            if (voo.estado_voo == PLANEJADO && ast.esta_vivo == true 
-                && voo.tem_astro_voo(cpf) == false)
+            if (voo != nullptr && voo->estado_voo == PLANEJADO && ast->esta_vivo == true 
+                && voo->tem_astro_voo(cpf) == false)
             {
-                voo.astronautas_cpf.push_back(cpf);
+                voo->astronautas_cpf.push_back(cpf);
             } else {
-                cout << "Por causas adversas, não foi possível realizar esta ação.";
-                cout << "verifique o estado do voo, astronautas ou da lista de passageiros." << endl;
+                cout << "Por causas adversas, não foi possível realizar esta ação. ";
+                cout << "Verifique o estado do voo, astronautas ou da lista de passageiros." << endl;
             }
         } else {
             cout << "Não foi possível encontrar o astronauta/voo selecionado." << endl;
@@ -133,24 +136,86 @@ public:
     static void remover_astronauta_voo(string cpf, int cod_voo){
         if (tem_cpf(cpf) && tem_voo(cod_voo) == true)
         {
-            Voo &voo = Voo::recuperar_voo_cod(cod_voo);
-
-            if (voo.estado_voo == PLANEJADO
-                && voo.tem_astro_voo(cpf) == true)
-            {
-                voo.astronautas_cpf.erase(
-                    remove(voo.astronautas_cpf.begin(), voo.astronautas_cpf.end(), cpf),
-                    voo.astronautas_cpf.end()
+            Voo* voo = Voo::recuperar_voo_cod(cod_voo);
+            
+            if (voo != nullptr && voo->estado_voo == PLANEJADO
+                && voo->tem_astro_voo(cpf) == true)
+            {   
+                voo->astronautas_cpf.erase(
+                    remove(voo->astronautas_cpf.begin(), voo->astronautas_cpf.end(), cpf),
+                    voo->astronautas_cpf.end()
                 );
             } else {
-                cout << "Por causas adversas, não foi possível realizar esta ação.";
-                cout << "verifique o estado do voo ou a lista de passageiros." << endl;
+                cout << "Por causas adversas, não foi possível realizar esta ação. ";
+                cout << "Verifique o estado do voo ou a lista de passageiros." << endl;
             }
         } else {
             cout << "Não foi possível encontrar o astronauta/voo selecionado." << endl;
         }
     }
 
+    static void lancar_voo(int cod_voo){
+        if (tem_voo(cod_voo) == true)
+        {
+            Voo* voo = Voo::recuperar_voo_cod(cod_voo);
+
+            if (voo != nullptr && voo->estado_voo == PLANEJADO
+                && voo->astronautas_cpf.empty() == false)
+            {   
+                bool todos_disp = true;
+                for (string ast_v: voo->astronautas_cpf)
+                {
+                    Astronautas* ast = Astronautas::recuperar_astronauta_cpf(ast_v);
+                    if (ast->esta_disponivel == false || ast->esta_vivo == false){
+                        todos_disp = false;
+                        cout << "O astronauta de cpf:" << ast_v << " não poderá participar do lançamento." << endl;
+                        cout << "Abortando missão..." << endl;
+                        break;
+                    }
+                }
+
+                if (todos_disp == true)
+                {
+                    voo->estado_voo = EM_CURSO;
+
+                    for (string ast_v: voo->astronautas_cpf)
+                    {
+                        Astronautas* ast = Astronautas::recuperar_astronauta_cpf(ast_v);
+                        ast->esta_disponivel = false;
+                    }
+                }
+            } else {
+                cout << "Por causas adversas, não foi possível realizar esta ação.";
+                cout << "verifique o estado do voo ou se há algum passageiro." << endl;
+            }
+        } else {
+            cout << "Não foi possível encontrar o voo selecionado." << endl;
+        }
+    }
+
+    static void explodir_voo(int cod_voo){
+        if (tem_voo(cod_voo) == true)
+        {
+            Voo* voo = Voo::recuperar_voo_cod(cod_voo);
+
+            if (voo != nullptr && voo->estado_voo == EM_CURSO)
+            {   
+                voo->estado_voo = FINALIZADO_EX;
+
+                for (string ast_v: voo->astronautas_cpf)
+                {
+                    Astronautas* ast = Astronautas::recuperar_astronauta_cpf(ast_v);
+                    ast->esta_disponivel = false;
+                    ast->esta_vivo = false;
+                }
+            } else {
+                cout << "Por causas adversas, não foi possível realizar esta ação. ";
+                cout << "Verifique o estado do voo." << endl;
+            }
+        } else {
+            cout << "Não foi possível encontrar o voo selecionado." << endl;
+        }
+    }
 };
 
 int main(){
@@ -184,11 +249,30 @@ int main(){
                 Voo::cadastrar_voo(cod_voo);
             }
 
+            if (operacao == "ADICIONAR_ASTRONAUTA"){
+                string cpf;
+                int cod_voo;
+                iss >> cpf >> cod_voo;
+                Voo::adicionar_astronauta_voo(cpf, cod_voo);
+            }
+
             if (operacao == "REMOVER_ASTRONAUTA") {
                 string cpf;
                 int cod;
                 iss >> cpf >> cod;
                 Voo::remover_astronauta_voo(cpf, cod);
+            }
+
+            if (operacao == "LANCAR_VOO") {
+                int cod_voo;
+                iss >> cod_voo;
+                Voo::lancar_voo(cod_voo);
+            }
+
+            if (operacao == "EXPLODIR_VOO") {
+                int cod_voo;
+                iss >> cod_voo;
+                Voo::explodir_voo(cod_voo);
             }
         }
 
