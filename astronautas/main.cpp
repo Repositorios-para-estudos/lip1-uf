@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 // constantes
@@ -13,6 +14,7 @@ vector<class Astronautas> V_ASTRONAUTAS;
 vector<class Voo> V_VOOS;
 
 // funções utilitárias
+
 // saber se tem ou não astronauta cadastrado
 bool tem_cpf(string cA);
 // saber se tem ou não voo cadastrado
@@ -89,15 +91,15 @@ public:
         return false;
     }
 
-    static Voo recuperar_voo_cod(int cod){
-        for (Voo v: V_VOOS)
+    static Voo& recuperar_voo_cod(int cod){
+        for (Voo &v: V_VOOS)
         {
             if (v.codigo_voo == cod)
             {
                 return v;
             }
         }
-        cout << "Não foi encontrado nehum voo com esse código." << endl;
+        cout << "Não foi encontrado nenhum voo com esse código." << endl;
     }
 
     static void cadastrar_voo(int cod){
@@ -127,6 +129,28 @@ public:
             cout << "Não foi possível encontrar o astronauta/voo selecionado." << endl;
         }
     }
+
+    static void remover_astronauta_voo(string cpf, int cod_voo){
+        if (tem_cpf(cpf) && tem_voo(cod_voo) == true)
+        {
+            Voo &voo = Voo::recuperar_voo_cod(cod_voo);
+
+            if (voo.estado_voo == PLANEJADO
+                && voo.tem_astro_voo(cpf) == true)
+            {
+                voo.astronautas_cpf.erase(
+                    remove(voo.astronautas_cpf.begin(), voo.astronautas_cpf.end(), cpf),
+                    voo.astronautas_cpf.end()
+                );
+            } else {
+                cout << "Por causas adversas, não foi possível realizar esta ação.";
+                cout << "verifique o estado do voo ou a lista de passageiros." << endl;
+            }
+        } else {
+            cout << "Não foi possível encontrar o astronauta/voo selecionado." << endl;
+        }
+    }
+
 };
 
 int main(){
@@ -153,11 +177,18 @@ int main(){
                 getline(iss, nome);
                 Astronautas::cadastrar_astronauta(cpf, idade, nome);
             }
-
+            
             if (operacao == "CADASTRAR_VOO") {
                 int cod_voo;
                 iss >> cod_voo;
                 Voo::cadastrar_voo(cod_voo);
+            }
+
+            if (operacao == "REMOVER_ASTRONAUTA") {
+                string cpf;
+                int cod;
+                iss >> cpf >> cod;
+                Voo::remover_astronauta_voo(cpf, cod);
             }
         }
 
