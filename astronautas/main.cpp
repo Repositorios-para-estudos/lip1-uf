@@ -216,6 +216,30 @@ public:
             cout << "Não foi possível encontrar o voo selecionado." << endl;
         }
     }
+
+    static void finalizar_voo(int cod_voo){
+        if (tem_voo(cod_voo) == true)
+        {
+            Voo* voo = Voo::recuperar_voo_cod(cod_voo);
+
+            if (voo != nullptr && voo->estado_voo == EM_CURSO)
+            {   
+                voo->estado_voo = FINALIZADO_S;
+
+                for (string ast_v: voo->astronautas_cpf)
+                {
+                    Astronautas* ast = Astronautas::recuperar_astronauta_cpf(ast_v);
+                    ast->esta_disponivel = true;
+                }
+            } else {
+                cout << "Por causas adversas, não foi possível realizar esta ação. ";
+                cout << "Verifique o estado do voo." << endl;
+            }
+        } else {
+            cout << "Não foi possível encontrar o voo selecionado." << endl;
+        }
+    }
+
 };
 
 int main(){
@@ -273,6 +297,12 @@ int main(){
                 int cod_voo;
                 iss >> cod_voo;
                 Voo::explodir_voo(cod_voo);
+            }
+
+            if (operacao == "FINALIZAR_VOO") {
+                int cod_voo;
+                iss >> cod_voo;
+                Voo::finalizar_voo(cod_voo);
             }
         }
 
