@@ -14,6 +14,7 @@ vector<class Voo> V_VOOS;
 
 // funções utilitárias
 bool tem_cpf(string cA);
+bool tem_voo(int cod);
 
 enum est_voo {
     PLANEJADO,
@@ -51,7 +52,19 @@ class Voo {
 public:
     int codigo_voo;
     vector <string> astronautas_cpf;
-    enum est_voo estado_voo;
+    enum est_voo estado_voo = PLANEJADO;
+
+    Voo(int cod){
+        codigo_voo = cod;
+    }
+
+    static void cadastrar_voo(int cod){
+        if (tem_voo(cod) == false){
+            V_VOOS.push_back(Voo(cod));
+        } else {
+            cout << "O código de voo " << cod <<" já está cadastrado. Abortando admissão." << endl;
+        }
+    }
 };
 
 int main(){
@@ -78,6 +91,12 @@ int main(){
                 getline(iss, nome);
                 Astronautas::cadastrar_astronauta(cpf, idade, nome);
             }
+
+            if (operacao == "CADASTRAR_VOO") {
+                int cod_voo;
+                iss >> cod_voo;
+                Voo::cadastrar_voo(cod_voo);
+            }
         }
 
         arquivo.close();
@@ -97,6 +116,23 @@ bool tem_cpf(string cA){
     for (Astronautas ast: V_ASTRONAUTAS)
     {
         if (ast.cpf.compare(cA) == 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+bool tem_voo(int cod){
+    if (V_VOOS.empty())
+    {
+        return false;
+    }
+    
+    for (Voo voo: V_VOOS)
+    {
+        if (voo.codigo_voo == cod)
         {
             return true;
         }
