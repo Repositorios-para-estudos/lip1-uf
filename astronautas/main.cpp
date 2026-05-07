@@ -13,7 +13,9 @@ vector<class Astronautas> V_ASTRONAUTAS;
 vector<class Voo> V_VOOS;
 
 // funções utilitárias
+// saber se tem ou não astronauta cadastrado
 bool tem_cpf(string cA);
+// saber se tem ou não voo cadastrado
 bool tem_voo(int cod);
 
 enum est_voo {
@@ -46,6 +48,18 @@ public:
             cout << "O CPF " << c <<" já está cadastrado. Abortando admissão." << endl;
         }
     };
+
+    static Astronautas recuperar_astronauta_cpf(string c){
+        for (Astronautas ast: V_ASTRONAUTAS)
+        {
+            if (ast.cpf.compare(c) == 0)
+            {
+                return ast;
+            }
+        }
+        cout << "Não foi encontrado nehum voo com esse código." << endl;
+    }
+
 };
 
 class Voo {
@@ -58,11 +72,59 @@ public:
         codigo_voo = cod;
     }
 
+    bool tem_astro_voo(string cpf){
+        if (astronautas_cpf.empty())
+        {
+            return false;
+        }
+        
+        for (string c: astronautas_cpf)
+        {
+            if (c.compare(cpf) == 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    static Voo recuperar_voo_cod(int cod){
+        for (Voo v: V_VOOS)
+        {
+            if (v.codigo_voo == cod)
+            {
+                return v;
+            }
+        }
+        cout << "Não foi encontrado nehum voo com esse código." << endl;
+    }
+
     static void cadastrar_voo(int cod){
-        if (tem_voo(cod) == false){
+        if (tem_voo(cod) == false)
+        {
             V_VOOS.push_back(Voo(cod));
         } else {
             cout << "O código de voo " << cod <<" já está cadastrado. Abortando admissão." << endl;
+        }
+    }
+
+    static void adicionar_astronauta_voo(string cpf, int cod_voo){
+        if (tem_cpf(cpf) && tem_voo(cod_voo) == true)
+        {
+            Astronautas ast = Astronautas::recuperar_astronauta_cpf(cpf);
+            Voo voo = Voo::recuperar_voo_cod(cod_voo);
+
+            if (voo.estado_voo == PLANEJADO && ast.esta_vivo == true 
+                && voo.tem_astro_voo(cpf) == false)
+            {
+                voo.astronautas_cpf.push_back(cpf);
+            } else {
+                cout << "Por causas adversas, não foi possível realizar esta ação.";
+                cout << "verifique o estado do voo, astronautas ou da lista de passageiros." << endl;
+            }
+        } else {
+            cout << "Não foi possível encontrar o astronauta/voo selecionado." << endl;
         }
     }
 };
