@@ -243,12 +243,12 @@ public:
     static string listar_astro_mortos(){
         if (V_ASTRONAUTAS.empty() || V_VOOS.empty())
         {
-            return "Não existe Astronautas ou Voo cadastrados.";
+            return "Não existe Astronautas ou Voos cadastrados.\n";
         }
         string mss;
         for (Astronautas ast: V_ASTRONAUTAS)
         {
-            mss += "=============!+!=============\n";
+            mss += "\n=============!+!=============\n";
             if(ast.esta_vivo == false){
                 mss += "Cpf: " + ast.cpf + "\nNome: " + ast.nome + "\nVoos:";
                 for (Voo &voo: V_VOOS){
@@ -261,6 +261,45 @@ public:
                 mss += "\n";
             }
         }
+        return mss;
+    }
+    static string listar_detalhes_voo(est_voo est){
+        string mss;
+        for (Voo &voo: V_VOOS)
+        {
+            if (voo.estado_voo == est)
+            {
+                mss += "Código do voo: " + voo.codigo_voo;
+                mss += "\nEstado:" + voo.estado_voo;
+                mss += "\nAstronautas no voo:\n";
+
+                for (string ast_v: voo.astronautas_cpf)
+                {
+                    Astronautas* ast = Astronautas::recuperar_astronauta_cpf(ast_v);
+                    mss += "CPF: "+ ast->cpf + "\tNome: " + ast->nome;
+                }                
+            }
+        }
+
+        return mss;
+    }
+
+    static string listar_voos(){
+        if (V_VOOS.empty())
+        {
+            return "Não existe Voos cadastrados.\n";
+        }
+        string mss = "=============!+!=============\n";
+        mss += "\n----PLANEJADOS----\n";
+        mss += Voo::listar_detalhes_voo(PLANEJADO);
+        mss += "\n----EM CURSO----\n";
+        mss += Voo::listar_detalhes_voo(EM_CURSO);
+        mss += "\n----FINALIZADOS COM SUCESSO----\n";
+        mss += Voo::listar_detalhes_voo(FINALIZADO_S);
+        mss += "\n----FINALIZADOS COM EXPLOSÃO----\n";
+        mss += Voo::listar_detalhes_voo(FINALIZADO_EX);
+        mss += "\n=============!+!=============";
+
         return mss;
     }
 
@@ -332,6 +371,11 @@ int main(){
             if (operacao == "LISTAR_MORTOS")
             {
                 cout << Voo::listar_astro_mortos() << endl;
+            }
+
+            if (operacao == "LISTAR_VOOS")
+            {
+                cout << Voo::listar_voos() << endl;
             }
             
         }
