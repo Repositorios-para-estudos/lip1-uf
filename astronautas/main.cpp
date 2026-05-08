@@ -126,7 +126,7 @@ public:
                 voo->astronautas_cpf.push_back(cpf);
             } else {
                 cout << "Por causas adversas, não foi possível realizar esta ação. ";
-                cout << "Verifique o estado do voo, astronautas ou da lista de passageiros." << endl;
+                cout << "Verifique o estado do voo, astronautas ou a lista de passageiros." << endl;
             }
         } else {
             cout << "Não foi possível encontrar o astronauta/voo selecionado." << endl;
@@ -240,6 +240,30 @@ public:
         }
     }
 
+    static string listar_astro_mortos(){
+        if (V_ASTRONAUTAS.empty() || V_VOOS.empty())
+        {
+            return "Não existe Astronautas ou Voo cadastrados.";
+        }
+        string mss;
+        for (Astronautas ast: V_ASTRONAUTAS)
+        {
+            mss += "=============!+!=============\n";
+            if(ast.esta_vivo == false){
+                mss += "Cpf: " + ast.cpf + "\nNome: " + ast.nome + "\nVoos:";
+                for (Voo &voo: V_VOOS){
+                    if ((voo.estado_voo == FINALIZADO_EX || voo.estado_voo == FINALIZADO_S)
+                        && voo.tem_astro_voo(ast.cpf))
+                    {
+                        mss += to_string(voo.codigo_voo) + " ";
+                    }
+                }
+                mss += "\n";
+            }
+        }
+        return mss;
+    }
+
 };
 
 int main(){
@@ -304,6 +328,12 @@ int main(){
                 iss >> cod_voo;
                 Voo::finalizar_voo(cod_voo);
             }
+
+            if (operacao == "LISTAR_MORTOS")
+            {
+                cout << Voo::listar_astro_mortos() << endl;
+            }
+            
         }
 
         arquivo.close();
